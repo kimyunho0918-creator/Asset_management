@@ -259,12 +259,28 @@ function getFluctuation(type) {
   }
 }
 
+// ==========================================
+// 💡 [시나리오 설정] 주식, 코인, 부동산 등 가격 변화 설정 구역
+// ==========================================
+// 각 턴(회차)마다 어떤 종목이 얼마나 오르고 내릴지 결정합니다.
+// 작성 형식: { effects: [{stock: '종목이름', type: '변동종류'}] }
+// 
+// [사용 가능한 변동 종류 (type)]
+// '폭등', '대폭 상승', '매우 상승' : +30%
+// '상승' : +20%
+// '약간 상승' : +10%
+// '동결' : 0% (변화 없음)
+// '약간 하락', '약간 감소' : -10%
+// '하락', '감소' : -20%
+// '폭락', '대폭 하락' : -30%
+// '상장폐지' : 0원으로 수렴 및 영구 거래 정지 (-100%)
+// ==========================================
 const scenarios = [
   // TURN 1
   [
     { effects: [{stock:'스페이스 X', type:'상승'},{stock:'$10(달러)', type:'상승'},{stock:'스테이블 코인', type:'상승'}] },
     { effects: [{stock:'희토류', type:'하락'}] },
-    { effects: [{stock:'금 1돈', type:'약간 상승'}] }, // 💡 금 약간 상승이 1턴에 추가되었습니다!
+    { effects: [{stock:'금 1돈', type:'약간 상승'}] }, // 💡 금 약간 상승 적용 완료
     { effects: [{stock:'해선땅', type:'동결'}] },
     { effects: [{stock:'SK 하이닉스', type:'상승'}] },
     { effects: [{stock:'쓰봉', type:'상승'}] },
@@ -334,7 +350,7 @@ const scenarios = [
     { effects: [{stock:'$10(달러)', type:'하락'}, {stock:'스테이블 코인', type:'하락'}] },
     { effects: [{stock:'쓰봉', type:'상승'}] },
     { effects: [{stock:'두범코인', type:'대폭 하락'}] },
-    { effects: [{stock:'X코인', type:'상장폐지'}]}
+    { effects: [{stock:'X코인', type:'상장폐지'}]} // 💡 콜론 빠져있던 오타 수정 완료!
   ]
 ];
 
@@ -372,7 +388,6 @@ function submitPassword() {
   if (pwd === correctPwd || isAdminPass) {
     closeModal('turn-lock-overlay');
     
-    // 모달창이 닫히면 주가 연산을 실행합니다 (6턴 마지막에도 실행됨)
     if (currentTurn <= MAX_TURN) {
       executeMarketFluctuation(currentTurn);
     }
@@ -422,25 +437,20 @@ function executeMarketFluctuation(completedTurn) {
 
   currentTurn = completedTurn + 1;
   
-  // 💡 6턴을 끝내고 최종 시장(currentTurn = 7) 상태가 된 경우 (자동 매도 실행)
   if (currentTurn > MAX_TURN) {
     
-    // ✅ 모든 보유 자산 자동 매도(현금화) 로직
     for (const [name, info] of Object.entries(player.inventory)) {
       const stockObj = marketData.find(s => s.name === name);
-      // 상장폐지된 종목이면 0원, 살아있으면 현재가
       const finalPrice = stockObj.active ? stockObj.price : 0;
       player.cash += finalPrice * info.qty;
     }
-    player.inventory = {}; // 포트폴리오 비우기
+    player.inventory = {};
 
     document.getElementById('disp-turn').textContent = `MARKET CLOSED`;
     const btnTurn = document.querySelector('.btn-turn');
     btnTurn.textContent = `📊 최종 성적표 보기`;
-    // 최종 성적표 보기 버튼을 누르면 endGame() 모달이 뜨게 합니다.
     btnTurn.onclick = function() { endGame(); };
     
-    // 거래 창 비활성화
     document.getElementById('trade-qty').disabled = true;
     document.getElementById('btn-buy').disabled = true;
     document.getElementById('btn-sell').disabled = true;
@@ -456,7 +466,7 @@ function executeMarketFluctuation(completedTurn) {
 }
 
 function endGame() {
-  const finalTotal = player.cash; // 모든 자산이 매도되었으므로 cash가 곧 최종 자산입니다.
+  const finalTotal = player.cash; 
   const yieldRate = ((finalTotal - initialCash) / initialCash * 100).toFixed(1);
   
   document.getElementById('end-total').textContent = finalTotal.toLocaleString() + '원';
