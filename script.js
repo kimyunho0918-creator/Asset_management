@@ -264,7 +264,7 @@ const scenarios = [
   [
     { effects: [{stock:'스페이스 X', type:'상승'},{stock:'$10(달러)', type:'상승'},{stock:'스테이블 코인', type:'상승'}] },
     { effects: [{stock:'희토류', type:'하락'}] },
-    { effects: [{stock:'금한돈', type:'약간 상승'}] },
+    { effects: [{stock:'금 1돈', type:'약간 상승'}] },
     { effects: [{stock:'해선땅', type:'동결'}] },
     { effects: [{stock:'SK 하이닉스', type:'상승'}] },
     { effects: [{stock:'쓰봉', type:'상승'}] },
