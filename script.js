@@ -5,12 +5,12 @@
 const ADMIN_PASSWORDS = ["1234", "7777", "admin"]; 
 
 const TURN_PASSWORDS = {
-  2: "pass2",
-  3: "pass3",
-  4: "pass4",
-  5: "pass5",
-  6: "pass6",
-  7: "pass7" // 6턴 종료 후 최종 주가(그래프) 반영을 위한 패스워드
+  2: "property",
+  3: "operation",
+  4: "simulation",
+  5: "with",
+  6: "toolbox",
+  7: "finish" // 6턴 종료 후 최종 주가(그래프) 반영을 위한 패스워드
 };
 
 const MAX_PWD_ATTEMPTS = 3;
@@ -57,8 +57,8 @@ function getUnit(name, cat) {
   if (cat === '코인') return '개';
   if (cat === '부동산') return '평';
   if (cat === '외화') {
-    if (name === '달러') return '달러';
-    if (name === '¥100(위안)') return '위안';
+    if (name === '$10(달러)') return 'x10달러';
+    if (name === '¥100(위안)') return 'x100위안';
     if (name === '금 1돈') return '돈';
   }
   return '개'; // 혹시 모를 예외 대비
