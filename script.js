@@ -271,7 +271,8 @@ const scenarios = [
     { effects: [{stock:'물류', type:'상승'}] },
     { effects: [{stock:'루프빈', type:'상승'}] },
     { effects: [{stock:'¥100(위안)', type:'하락'}] },
-    { effects: [{stock:'스페이스 X', type:'대폭 상승'}] }
+    { effects: [{stock:'스페이스 X', type:'대폭 상승'}] },
+    { effects: [{stock:'X코인', type:'약간 상승'}] }
   ],
   // TURN 2
   [
@@ -282,7 +283,8 @@ const scenarios = [
     { effects: [{stock:'물류', type:'하락'}] },
     { effects: [{stock:'현대차', type:'약간 상승'}] },
     { effects: [{stock:'해선땅', type:'상승'}] },
-    { effects: [{stock:'옥땅', type:'하락'}] }
+    { effects: [{stock:'옥땅', type:'하락'}] },
+    { effects: [{stock:'X코인', type:'하락'}] }
   ],
   // TURN 3
   [
@@ -294,7 +296,8 @@ const scenarios = [
     { effects: [{stock:'현대차', type:'약간 하락'}] },
     { effects: [{stock:'물류', type:'상승'}] },
     { effects: [{stock:'희토류', type:'대폭 하락'}] },
-    { effects: [{stock:'옥땅', type:'상승'}] }
+    { effects: [{stock:'옥땅', type:'상승'}] },
+    { effects: [{stock:'X코인', type:'약간 하락'}]}
   ],
   // TURN 4
   [
@@ -306,7 +309,8 @@ const scenarios = [
     { effects: [{stock:'루프빈', type:'상승'}] },
     { effects: [{stock:'$10(달러)', type:'상승'}, {stock:'스테이블 코인', type:'상승'}] },
     { effects: [{stock:'옥땅', type:'상승'}] },
-    { effects: [{stock:'해선땅', type:'상승'}] }
+    { effects: [{stock:'해선땅', type:'상승'}] },
+    { effects: [{stock:'X코인', type:'약간 하락'}]}
   ],
   // TURN 5
   [
@@ -317,7 +321,8 @@ const scenarios = [
     { effects: [{stock:'¥100(위안)', type:'하락'}] },
     { effects: [{stock:'현대차', type:'상승'}] },
     { effects: [{stock:'SK 하이닉스', type:'대폭 하락'}] },
-    { effects: [{stock:'해선땅', type:'하락'}] }
+    { effects: [{stock:'해선땅', type:'하락'}] },
+    { effects: [{stock:'X코인', type:'상승'}]}
   ],
   // TURN 6
   [
@@ -328,7 +333,8 @@ const scenarios = [
     { effects: [{stock:'루프빈', type:'상장폐지'}] },
     { effects: [{stock:'$10(달러)', type:'하락'}, {stock:'스테이블 코인', type:'하락'}] },
     { effects: [{stock:'쓰봉', type:'상승'}] },
-    { effects: [{stock:'두범코인', type:'대폭 하락'}] }
+    { effects: [{stock:'두범코인', type:'대폭 하락'}] },
+    { effects: [{stock:'X코인', type'상장폐지'}]}
   ]
 ];
 
