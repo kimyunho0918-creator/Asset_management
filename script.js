@@ -61,69 +61,92 @@ function getUnit(name, cat) {
     if (name === '¥100(위안)') return 'x100위안';
     if (name === '금 1돈') return '돈';
   }
-  return '개'; // 혹시 모를 예외 대비
+  return '개';
 }
 
 window.onload = function() {
   const savedData = localStorage.getItem('stockGameState');
   if (savedData) {
-    const state = JSON.parse(savedData);
-    
-    document.getElementById('inp-id').value = state.id;
-    document.getElementById('inp-name').value = state.name;
-    
-    document.getElementById('disp-id').textContent = state.id;
-    document.getElementById('disp-name').textContent = state.name;
-    if (state.teamSize && state.teamSize !== "관리자") {
-      document.getElementById('disp-team-size').textContent = `(${state.teamSize}명)`;
-    } else if (state.teamSize === "관리자") {
-      document.getElementById('disp-team-size').textContent = "(관리자)";
-    }
-    
-    currentTurn = state.currentTurn;
-    player = state.player;
-    marketData = state.marketData;
-    endPwdAttempts = state.endPwdAttempts || 0;
-    isViolated = state.violation || false;
-
-    if (isViolated) {
-      triggerViolationScreen();
-      return;
-    }
-
-    if (state.id === "ADMIN") {
-      const adminResetBtn = document.getElementById('btn-admin-reset-main');
-      if(adminResetBtn) adminResetBtn.style.display = 'inline-block';
-    }
-
-    document.getElementById('screen-login').classList.remove('active');
-    document.getElementById('screen-main').classList.add('active');
-
-    // 💡 6턴 결과가 반영되어 최종 상태인 경우 (currentTurn > MAX_TURN)
-    if (currentTurn > MAX_TURN) {
-      document.getElementById('disp-turn').textContent = `MARKET CLOSED`;
-      const btnTurn = document.querySelector('.btn-turn');
-      btnTurn.textContent = `📊 최종 성적표 보기`;
-      btnTurn.onclick = function() { endGame(); };
+    try {
+      const state = JSON.parse(savedData);
       
-      document.getElementById('trade-qty').disabled = true;
-      document.getElementById('btn-buy').disabled = true;
-      document.getElementById('btn-sell').disabled = true;
-    } else {
-      document.getElementById('disp-turn').textContent = `TURN ${currentTurn} / ${MAX_TURN}`;
-      document.querySelector('.btn-turn').onclick = function() { requestNextTurn(); };
-    }
+      const elId = document.getElementById('inp-id');
+      const elName = document.getElementById('inp-name');
+      if(elId) elId.value = state.id;
+      if(elName) elName.value = state.name;
+      
+      const dispId = document.getElementById('disp-id');
+      const dispName = document.getElementById('disp-name');
+      const dispTeamSize = document.getElementById('disp-team-size');
 
-    renderMarket(currentCategory);
-    updatePortfolioUI();
-    selectStock('물류'); 
+      if(dispId) dispId.textContent = state.id;
+      if(dispName) dispName.textContent = state.name;
+      
+      if (dispTeamSize) {
+        if (state.teamSize && state.teamSize !== "관리자") {
+          dispTeamSize.textContent = `(${state.teamSize}명)`;
+        } else if (state.teamSize === "관리자") {
+          dispTeamSize.textContent = "(관리자)";
+        }
+      }
+      
+      currentTurn = state.currentTurn || 1;
+      player = state.player || { cash: 10000000, inventory: {} };
+      marketData = state.marketData || getInitialMarketData();
+      endPwdAttempts = state.endPwdAttempts || 0;
+      isViolated = state.violation || false;
+
+      if (isViolated) {
+        triggerViolationScreen();
+        return;
+      }
+
+      if (state.id === "ADMIN") {
+        const adminResetBtn = document.getElementById('btn-admin-reset-main');
+        if(adminResetBtn) adminResetBtn.style.display = 'inline-block';
+      }
+
+      document.getElementById('screen-login').classList.remove('active');
+      document.getElementById('screen-main').classList.add('active');
+
+      if (currentTurn > MAX_TURN) {
+        document.getElementById('disp-turn').textContent = `MARKET CLOSED`;
+        const btnTurn = document.querySelector('.btn-turn');
+        if(btnTurn) {
+          btnTurn.textContent = `📊 최종 성적표 보기`;
+          btnTurn.onclick = function() { endGame(); };
+        }
+        
+        const trQty = document.getElementById('trade-qty');
+        const bBuy = document.getElementById('btn-buy');
+        const bSell = document.getElementById('btn-sell');
+        if(trQty) trQty.disabled = true;
+        if(bBuy) bBuy.disabled = true;
+        if(bSell) bSell.disabled = true;
+      } else {
+        document.getElementById('disp-turn').textContent = `TURN ${currentTurn} / ${MAX_TURN}`;
+        const btnTurn = document.querySelector('.btn-turn');
+        if(btnTurn) btnTurn.onclick = function() { requestNextTurn(); };
+      }
+
+      renderMarket(currentCategory);
+      updatePortfolioUI();
+      selectStock('물류'); 
+    } catch (e) {
+      console.error("데이터 복구 오류. 초기화합니다.", e);
+      localStorage.removeItem('stockGameState');
+    }
   }
 };
 
 function saveGame() {
-  const teamSizeText = document.getElementById('disp-team-size').textContent;
-  let tSize = teamSizeText.replace(/[^0-9]/g, '');
-  if (teamSizeText.includes("관리자")) tSize = "관리자";
+  const dispTeamSize = document.getElementById('disp-team-size');
+  let tSize = "1";
+  if(dispTeamSize) {
+    const teamSizeText = dispTeamSize.textContent;
+    tSize = teamSizeText.replace(/[^0-9]/g, '');
+    if (teamSizeText.includes("관리자")) tSize = "관리자";
+  }
 
   const state = {
     id: document.getElementById('disp-id').textContent,
@@ -139,15 +162,20 @@ function saveGame() {
 }
 
 function toggleTeamInput() {
-  const inputTypeEl = document.querySelector('input[name="team-input-type"]:checked');
-  if (!inputTypeEl) return;
+  const typeRadio = document.querySelector('input[name="team-input-type"]:checked');
+  if (!typeRadio) return;
   
-  if (inputTypeEl.value === 'select') {
-    document.getElementById('inp-team-size-sel').style.display = 'block';
-    document.getElementById('inp-team-size-dir').style.display = 'none';
-  } else {
-    document.getElementById('inp-team-size-sel').style.display = 'none';
-    document.getElementById('inp-team-size-dir').style.display = 'block';
+  const selEl = document.getElementById('inp-team-size-sel');
+  const dirEl = document.getElementById('inp-team-size-dir');
+  
+  if (selEl && dirEl) {
+    if (typeRadio.value === 'select') {
+      selEl.style.display = 'block';
+      dirEl.style.display = 'none';
+    } else {
+      selEl.style.display = 'none';
+      dirEl.style.display = 'block';
+    }
   }
 }
 
@@ -156,12 +184,15 @@ function adminLogin() {
   if (pwd === null) return;
   
   if (ADMIN_PASSWORDS.includes(pwd)) {
-    document.getElementById('inp-id').value = "ADMIN";
-    document.getElementById('inp-name').value = "운영진";
+    const elId = document.getElementById('inp-id');
+    const elName = document.getElementById('inp-name');
+    if(elId) elId.value = "ADMIN";
+    if(elName) elName.value = "운영진";
     
     document.getElementById('disp-id').textContent = "ADMIN";
     document.getElementById('disp-name').textContent = "운영진";
-    document.getElementById('disp-team-size').textContent = "(관리자)";
+    const dispTeam = document.getElementById('disp-team-size');
+    if(dispTeam) dispTeam.textContent = "(관리자)";
     
     const adminBtn = document.getElementById('btn-admin-reset-main');
     if(adminBtn) adminBtn.style.display = 'inline-block';
@@ -179,13 +210,20 @@ function adminLogin() {
 }
 
 function checkAdminMode() {
-  const idVal = document.getElementById('inp-id').value.trim();
-  const nameVal = document.getElementById('inp-name').value.trim().toLowerCase();
+  const elId = document.getElementById('inp-id');
+  const elName = document.getElementById('inp-name');
+  if(!elId || !elName) return;
+
+  const idVal = elId.value.trim();
+  const nameVal = elName.value.trim().toLowerCase();
   
-  if ((nameVal === "admin" || nameVal === "admain") && idVal === "") {
-    document.getElementById('admin-reset-btn').style.display = 'block';
-  } else {
-    document.getElementById('admin-reset-btn').style.display = 'none';
+  const resetBtn = document.getElementById('admin-reset-btn');
+  if(resetBtn) {
+    if ((nameVal === "admin" || nameVal === "admain") && idVal === "") {
+      resetBtn.style.display = 'block';
+    } else {
+      resetBtn.style.display = 'none';
+    }
   }
 }
 
@@ -194,14 +232,20 @@ function requestSystemReset() {
   document.getElementById('reset-error').textContent = '';
   document.getElementById('reset-pwd').value = '';
   
-  if(document.getElementById('disp-id').textContent === "ADMIN"){
-    document.getElementById('reset-desc-text').innerHTML = `시스템 데이터를 초기화하려면 관리자 비밀번호를 입력하세요.<br><span style="color:var(--green);">관리자 모드 접속 중 (횟수 무제한)</span>`;
+  const dispId = document.getElementById('disp-id');
+  const descText = document.getElementById('reset-desc-text');
+  
+  if(dispId && dispId.textContent === "ADMIN"){
+    if(descText) descText.innerHTML = `시스템 데이터를 초기화하려면 관리자 비밀번호를 입력하세요.<br><span style="color:var(--green);">관리자 모드 접속 중 (횟수 무제한)</span>`;
   } else {
-    document.getElementById('reset-desc-text').innerHTML = `시스템 데이터를 초기화하려면 관리자 비밀번호를 입력하세요.<br><span style="color:var(--red);">남은 기회: ${remaining}번</span>`;
+    if(descText) descText.innerHTML = `시스템 데이터를 초기화하려면 관리자 비밀번호를 입력하세요.<br><span style="color:var(--red);">남은 기회: ${remaining}번</span>`;
   }
   
   openModal('reset-lock-overlay');
-  setTimeout(() => document.getElementById('reset-pwd').focus(), 100);
+  setTimeout(() => {
+    const pwdEl = document.getElementById('reset-pwd');
+    if(pwdEl) pwdEl.focus();
+  }, 100);
 }
 
 function tryEndReset() {
@@ -209,8 +253,10 @@ function tryEndReset() {
 }
 
 function submitResetPassword() {
-  const pwd = document.getElementById('reset-pwd').value.trim();
-  const isAdmin = (document.getElementById('disp-id').textContent === "ADMIN");
+  const pwdEl = document.getElementById('reset-pwd');
+  const pwd = pwdEl ? pwdEl.value.trim() : "";
+  const dispId = document.getElementById('disp-id');
+  const isAdmin = (dispId && dispId.textContent === "ADMIN");
   
   if (ADMIN_PASSWORDS.includes(pwd)) { 
     localStorage.removeItem('stockGameState');
@@ -230,8 +276,10 @@ function submitResetPassword() {
       const remaining = isAdmin ? "무제한 (관리자)" : (MAX_PWD_ATTEMPTS - endPwdAttempts) + "번";
       document.getElementById('reset-error').textContent = "❌ 보안 코드가 일치하지 않습니다.";
       document.getElementById('reset-desc-text').innerHTML = `시스템 데이터를 초기화하려면 관리자 비밀번호를 입력하세요.<br><span style="color:var(--red);">남은 기회: ${remaining}</span>`;
-      document.getElementById('reset-pwd').value = '';
-      document.getElementById('reset-pwd').focus();
+      if(pwdEl) {
+        pwdEl.value = '';
+        pwdEl.focus();
+      }
     }
   }
 }
@@ -240,7 +288,10 @@ function triggerViolationScreen() {
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.overlay').forEach(el => el.classList.remove('open'));
   
-  const idValue = document.getElementById('disp-id').textContent || document.getElementById('inp-id').value;
+  const dispId = document.getElementById('disp-id');
+  const inpId = document.getElementById('inp-id');
+  const idValue = (dispId && dispId.textContent !== "-") ? dispId.textContent : (inpId ? inpId.value : "");
+  
   document.getElementById('violation-id-display').textContent = `학번: ${idValue || "미등록"}`;
   document.getElementById('violation-screen').classList.add('active');
 }
@@ -259,28 +310,13 @@ function getFluctuation(type) {
   }
 }
 
-// ==========================================
-// 💡 [시나리오 설정] 주식, 코인, 부동산 등 가격 변화 설정 구역
-// ==========================================
-// 각 턴(회차)마다 어떤 종목이 얼마나 오르고 내릴지 결정합니다.
-// 작성 형식: { effects: [{stock: '종목이름', type: '변동종류'}] }
-// 
-// [사용 가능한 변동 종류 (type)]
-// '폭등', '대폭 상승', '매우 상승' : +30%
-// '상승' : +20%
-// '약간 상승' : +10%
-// '동결' : 0% (변화 없음)
-// '약간 하락', '약간 감소' : -10%
-// '하락', '감소' : -20%
-// '폭락', '대폭 하락' : -30%
-// '상장폐지' : 0원으로 수렴 및 영구 거래 정지 (-100%)
-// ==========================================
+// ── 💡 시나리오 설정 (사용자 설정 완벽 보존 / 오타 수정) ──
 const scenarios = [
   // TURN 1
   [
     { effects: [{stock:'스페이스 X', type:'상승'},{stock:'$10(달러)', type:'상승'},{stock:'스테이블 코인', type:'상승'}] },
     { effects: [{stock:'희토류', type:'하락'}] },
-    { effects: [{stock:'금 1돈', type:'약간 상승'}] }, // 💡 금 약간 상승 적용 완료
+    { effects: [{stock:'금 1돈', type:'약간 상승'}] }, 
     { effects: [{stock:'해선땅', type:'동결'}] },
     { effects: [{stock:'SK 하이닉스', type:'상승'}] },
     { effects: [{stock:'쓰봉', type:'상승'}] },
@@ -350,18 +386,17 @@ const scenarios = [
     { effects: [{stock:'$10(달러)', type:'하락'}, {stock:'스테이블 코인', type:'하락'}] },
     { effects: [{stock:'쓰봉', type:'상승'}] },
     { effects: [{stock:'두범코인', type:'대폭 하락'}] },
-    { effects: [{stock:'X코인', type:'상장폐지'}]} // 💡 콜론 빠져있던 오타 수정 완료!
+    { effects: [{stock:'X코인', type:'상장폐지'}]} // 💡 오타 수정 반영됨
   ]
 ];
 
 function requestNextTurn() {
   const titleEl = document.getElementById('lock-title');
   const descEl = document.getElementById('lock-desc');
-  const errorEl = document.getElementById('lock-error');
   const inputEl = document.getElementById('lock-pwd');
   
-  inputEl.value = '';
-  errorEl.textContent = '';
+  if(inputEl) inputEl.value = '';
+  document.getElementById('lock-error').textContent = '';
   
   if (currentTurn < MAX_TURN) {
     const targetT = currentTurn + 1;
@@ -373,17 +408,18 @@ function requestNextTurn() {
   }
   
   openModal('turn-lock-overlay');
-  setTimeout(() => inputEl.focus(), 100);
+  setTimeout(() => { if(inputEl) inputEl.focus(); }, 100);
 }
 
 function submitPassword() {
   const targetT = currentTurn <= MAX_TURN ? currentTurn + 1 : 7;
   const inputEl = document.getElementById('lock-pwd');
   const errorEl = document.getElementById('lock-error');
-  const pwd = inputEl.value.trim();
+  const pwd = inputEl ? inputEl.value.trim() : "";
   
   const correctPwd = TURN_PASSWORDS[targetT];
-  const isAdminPass = (document.getElementById('disp-id').textContent === "ADMIN" && ADMIN_PASSWORDS.includes(pwd));
+  const dispId = document.getElementById('disp-id');
+  const isAdminPass = (dispId && dispId.textContent === "ADMIN" && ADMIN_PASSWORDS.includes(pwd));
 
   if (pwd === correctPwd || isAdminPass) {
     closeModal('turn-lock-overlay');
@@ -392,9 +428,11 @@ function submitPassword() {
       executeMarketFluctuation(currentTurn);
     }
   } else {
-    errorEl.textContent = "❌ 보안 코드가 일치하지 않습니다.";
-    inputEl.value = '';
-    inputEl.focus();
+    if(errorEl) errorEl.textContent = "❌ 보안 코드가 일치하지 않습니다.";
+    if(inputEl) {
+      inputEl.value = '';
+      inputEl.focus();
+    }
   }
 }
 
@@ -438,25 +476,31 @@ function executeMarketFluctuation(completedTurn) {
   currentTurn = completedTurn + 1;
   
   if (currentTurn > MAX_TURN) {
-    
     for (const [name, info] of Object.entries(player.inventory)) {
       const stockObj = marketData.find(s => s.name === name);
       const finalPrice = stockObj.active ? stockObj.price : 0;
       player.cash += finalPrice * info.qty;
     }
-    player.inventory = {};
+    player.inventory = {}; 
 
     document.getElementById('disp-turn').textContent = `MARKET CLOSED`;
     const btnTurn = document.querySelector('.btn-turn');
-    btnTurn.textContent = `📊 최종 성적표 보기`;
-    btnTurn.onclick = function() { endGame(); };
+    if(btnTurn) {
+      btnTurn.textContent = `📊 최종 성적표 보기`;
+      btnTurn.onclick = function() { endGame(); };
+    }
     
-    document.getElementById('trade-qty').disabled = true;
-    document.getElementById('btn-buy').disabled = true;
-    document.getElementById('btn-sell').disabled = true;
+    const tradeQty = document.getElementById('trade-qty');
+    const btnBuy = document.getElementById('btn-buy');
+    const btnSell = document.getElementById('btn-sell');
+    
+    if(tradeQty) tradeQty.disabled = true;
+    if(btnBuy) btnBuy.disabled = true;
+    if(btnSell) btnSell.disabled = true;
   } else {
     document.getElementById('disp-turn').textContent = `TURN ${currentTurn} / ${MAX_TURN}`;
-    document.querySelector('.btn-turn').onclick = function() { requestNextTurn(); };
+    const btnTurn = document.querySelector('.btn-turn');
+    if(btnTurn) btnTurn.onclick = function() { requestNextTurn(); };
   }
 
   renderMarket(currentCategory);
@@ -472,8 +516,10 @@ function endGame() {
   document.getElementById('end-total').textContent = finalTotal.toLocaleString() + '원';
   
   const yieldEl = document.getElementById('end-yield');
-  yieldEl.textContent = yieldRate > 0 ? `+${yieldRate}%` : `${yieldRate}%`;
-  yieldEl.style.color = yieldRate > 0 ? 'var(--red)' : (yieldRate < 0 ? 'var(--blue)' : 'var(--text)');
+  if(yieldEl) {
+    yieldEl.textContent = yieldRate > 0 ? `+${yieldRate}%` : `${yieldRate}%`;
+    yieldEl.style.color = yieldRate > 0 ? 'var(--red)' : (yieldRate < 0 ? 'var(--blue)' : 'var(--text)');
+  }
 
   let rankText = "";
   if (yieldRate >= 100) rankText = "👑 워렌 버핏의 재림";
@@ -486,6 +532,7 @@ function endGame() {
   document.getElementById('end-overlay').classList.add('open');
 }
 
+// ── 💡 100% 실행 보장 시작 로직 (방어 코드) ──
 function startGame() {
   const elId = document.getElementById('inp-id');
   const elName = document.getElementById('inp-name');
@@ -495,23 +542,34 @@ function startGame() {
   const id = elId.value.trim();
   const name = elName.value.trim();
   
-  const typeRadio = document.querySelector('input[name="team-input-type"]:checked');
-  const inputType = typeRadio ? typeRadio.value : 'select';
-  
   let teamSize = "";
-  if (inputType === 'select') {
-    teamSize = document.getElementById('inp-team-size-sel').value;
+  
+  // 구버전 HTML과 신버전 HTML을 자동으로 감지하여 에러 방지
+  const typeRadio = document.querySelector('input[name="team-input-type"]:checked');
+  const selEl = document.getElementById('inp-team-size-sel');
+  const dirEl = document.getElementById('inp-team-size-dir');
+  const oldEl = document.getElementById('inp-team-size');
+
+  if (selEl && dirEl) {
+    const inputType = typeRadio ? typeRadio.value : 'select';
+    teamSize = (inputType === 'select') ? selEl.value : dirEl.value.trim();
+  } else if (oldEl) {
+    teamSize = oldEl.value.trim();
   } else {
-    teamSize = document.getElementById('inp-team-size-dir').value.trim();
+    teamSize = "1"; // 최악의 경우 기본값 세팅
   }
 
   if(!id || !name || !teamSize) {
     return alert('학번, 이름, 팀원 수를 모두 정확히 입력해주세요.');
   }
   
-  document.getElementById('disp-id').textContent = id;
-  document.getElementById('disp-name').textContent = name;
-  document.getElementById('disp-team-size').textContent = `(${teamSize}명)`;
+  const dispId = document.getElementById('disp-id');
+  const dispName = document.getElementById('disp-name');
+  const dispTeamSize = document.getElementById('disp-team-size');
+  
+  if(dispId) dispId.textContent = id;
+  if(dispName) dispName.textContent = name;
+  if(dispTeamSize) dispTeamSize.textContent = `(${teamSize}명)`;
   
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-main').classList.add('active');
@@ -524,7 +582,9 @@ function startGame() {
 
 function renderMarket(filterCat = 'all') {
   const container = document.getElementById('stock-list-container');
+  if(!container) return;
   container.innerHTML = '';
+  
   const categories = ['주식', '부동산', '코인', '외화'];
   
   categories.forEach(cat => {
@@ -556,22 +616,27 @@ function renderMarket(filterCat = 'all') {
 
 function filterCat(cat, btn) {
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
   currentCategory = cat;
   renderMarket(cat);
 }
 
 function selectStock(name) {
   currentSelectedStock = marketData.find(s => s.name === name);
+  if(!currentSelectedStock) return;
+  
+  const btnBuy = document.getElementById('btn-buy');
+  const btnSell = document.getElementById('btn-sell');
+  const trQty = document.getElementById('trade-qty');
   
   if(!currentSelectedStock.active || currentTurn > MAX_TURN) {
-    document.getElementById('btn-buy').disabled = true;
-    document.getElementById('btn-sell').disabled = true;
-    document.getElementById('trade-qty').disabled = true;
+    if(btnBuy) btnBuy.disabled = true;
+    if(btnSell) btnSell.disabled = true;
+    if(trQty) trQty.disabled = true;
   } else {
-    document.getElementById('btn-buy').disabled = false;
-    document.getElementById('btn-sell').disabled = false;
-    document.getElementById('trade-qty').disabled = false;
+    if(btnBuy) btnBuy.disabled = false;
+    if(btnSell) btnSell.disabled = false;
+    if(trQty) trQty.disabled = false;
   }
 
   renderMarket(currentCategory);
@@ -589,10 +654,12 @@ function selectStock(name) {
 
 function drawChart() {
   if(!currentSelectedStock || !currentSelectedStock.active) {
-    document.getElementById('stockChart').getContext('2d').clearRect(0,0,2000,1000);
+    const cvs = document.getElementById('stockChart');
+    if(cvs) cvs.getContext('2d').clearRect(0,0,2000,1000);
     return;
   }
   const canvas = document.getElementById('stockChart');
+  if(!canvas) return;
   const ctx = canvas.getContext('2d');
   const parent = canvas.parentElement;
   
@@ -674,38 +741,43 @@ const graphContainer = document.getElementById('graph-container');
 const tooltip = document.getElementById('chart-tooltip');
 const crosshairX = document.getElementById('chart-crosshair-x');
 
-graphContainer.addEventListener('mousemove', (e) => {
-  if (chartPoints.length < 2) return;
-  const rect = graphContainer.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
+if (graphContainer) {
+  graphContainer.addEventListener('mousemove', (e) => {
+    if (chartPoints.length < 2) return;
+    const rect = graphContainer.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
 
-  let closestPoint = chartPoints[0];
-  let minDiff = Math.abs(mouseX - closestPoint.x);
+    let closestPoint = chartPoints[0];
+    let minDiff = Math.abs(mouseX - closestPoint.x);
 
-  for (let i = 1; i < chartPoints.length; i++) {
-    const diff = Math.abs(mouseX - chartPoints[i].x);
-    if (diff < minDiff) {
-      minDiff = diff;
-      closestPoint = chartPoints[i];
+    for (let i = 1; i < chartPoints.length; i++) {
+      const diff = Math.abs(mouseX - chartPoints[i].x);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestPoint = chartPoints[i];
+      }
     }
-  }
 
-  tooltip.style.display = 'block';
-  crosshairX.style.display = 'block';
-  tooltip.style.left = `${closestPoint.x}px`;
-  tooltip.style.top = `${closestPoint.y}px`;
-  tooltip.innerHTML = `<span style="color:#a0a8b1;">Turn ${closestPoint.turn}</span><br><strong style="font-size:13px;">${closestPoint.price.toLocaleString()}원</strong>`;
-  crosshairX.style.left = `${closestPoint.x}px`;
-});
+    if(tooltip && crosshairX) {
+      tooltip.style.display = 'block';
+      crosshairX.style.display = 'block';
+      tooltip.style.left = `${closestPoint.x}px`;
+      tooltip.style.top = `${closestPoint.y}px`;
+      tooltip.innerHTML = `<span style="color:#a0a8b1;">Turn ${closestPoint.turn}</span><br><strong style="font-size:13px;">${closestPoint.price.toLocaleString()}원</strong>`;
+      crosshairX.style.left = `${closestPoint.x}px`;
+    }
+  });
 
-graphContainer.addEventListener('mouseleave', () => {
-  tooltip.style.display = 'none';
-  crosshairX.style.display = 'none';
-});
+  graphContainer.addEventListener('mouseleave', () => {
+    if(tooltip) tooltip.style.display = 'none';
+    if(crosshairX) crosshairX.style.display = 'none';
+  });
+}
 
 function buyStock() {
   if(!currentSelectedStock || !currentSelectedStock.active) return alert('유효한 종목을 선택하세요.');
-  const qty = parseInt(document.getElementById('trade-qty').value);
+  const qtyEl = document.getElementById('trade-qty');
+  const qty = qtyEl ? parseInt(qtyEl.value) : 0;
   if(isNaN(qty) || qty <= 0) return alert('올바른 수량을 입력하세요.');
   const totalCost = currentSelectedStock.price * qty;
   if(player.cash < totalCost) return alert('보유 현금이 부족합니다.');
@@ -724,7 +796,8 @@ function buyStock() {
 
 function sellStock() {
   if(!currentSelectedStock || !currentSelectedStock.active) return alert('유효한 종목을 선택하세요.');
-  const qty = parseInt(document.getElementById('trade-qty').value);
+  const qtyEl = document.getElementById('trade-qty');
+  const qty = qtyEl ? parseInt(qtyEl.value) : 0;
   if(isNaN(qty) || qty <= 0) return alert('올바른 수량을 입력하세요.');
   
   const item = player.inventory[currentSelectedStock.name];
@@ -740,9 +813,12 @@ function sellStock() {
 }
 
 function updatePortfolioUI() {
-  document.getElementById('my-cash').textContent = player.cash.toLocaleString() + '원';
+  const myCashEl = document.getElementById('my-cash');
+  if(myCashEl) myCashEl.textContent = player.cash.toLocaleString() + '원';
+  
   let totalStockValue = 0;
   const portList = document.getElementById('portfolio-list');
+  if(!portList) return;
   portList.innerHTML = '';
   
   for(const [name, info] of Object.entries(player.inventory)) {
@@ -762,15 +838,25 @@ function updatePortfolioUI() {
     portList.innerHTML += `<div class="port-item"><span style="${isDelisted?'text-decoration:line-through;color:#777;':''}">${name} <strong style="color:var(--text); margin-left:4px;">${info.qty}</strong>${unit}</span><span style="color:${yColor}; font-weight:700;">${yieldText}</span></div>`;
   }
   
-  if(Object.keys(player.inventory).length === 0) portList.innerHTML = '<div style="color:var(--muted); text-align:center; padding:10px 0;">보유 자산이 없습니다.</div>';
+  if(Object.keys(player.inventory).length === 0) {
+    portList.innerHTML = '<div style="color:var(--muted); text-align:center; padding:10px 0;">보유 자산이 없습니다.</div>';
+  }
   
   const totalAsset = player.cash + totalStockValue;
-  document.getElementById('my-total').textContent = totalAsset.toLocaleString() + '원';
+  const myTotalEl = document.getElementById('my-total');
+  if(myTotalEl) myTotalEl.textContent = totalAsset.toLocaleString() + '원';
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) { 
+  const el = document.getElementById(id);
+  if(el) el.classList.add('open'); 
+}
+function closeModal(id) { 
+  const el = document.getElementById(id);
+  if(el) el.classList.remove('open'); 
+}
 
 window.addEventListener('resize', () => {
-  if(document.getElementById('screen-main').classList.contains('active')) drawChart();
+  const main = document.getElementById('screen-main');
+  if(main && main.classList.contains('active')) drawChart();
 });
