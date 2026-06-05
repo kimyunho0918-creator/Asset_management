@@ -4,20 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>모의 주식 게임 - 시나리오 통제 시스템</title>
-<!-- 외부 CSS 파일 연결 -->
 <link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<!-- ── 1. 로그인 화면 ── -->
 <div id="screen-login" class="screen active">
   <div class="login-wrap">
     
-    <!-- 💡 히든 관리자 로그인 핫스팟 -->
     <div style="text-align: center; margin-bottom: 36px;">
       <div class="login-logo" style="position: relative; display: inline-block;">
-        <!-- 로고와 글자를 덮는 투명 버튼 -->
         <div onclick="adminLogin()" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; z-index: 100;"></div>
         <div class="logo-icon">📈</div>
         <h1>모의 주식 게임</h1>
@@ -35,7 +31,6 @@
         <input type="text" id="inp-name" placeholder="예) 홍길동" oninput="checkAdminMode()">
       </div>
 
-      <!-- 팀원 수 입력 (선택/직접입력 토글) -->
       <div class="field-group">
         <label>팀원 수</label>
         <div style="display: flex; gap: 16px; margin-bottom: 10px;">
@@ -65,13 +60,11 @@
 
       <button class="btn-start" onclick="startGame()">▶ 게임 시작 (총 6턴)</button>
       
-      <!-- 학번 비우고 이름에 admin 쳤을 때 나타나는 초기화 버튼 -->
       <div id="admin-reset-btn" class="reset-note" style="display: none;" onclick="requestSystemReset()">진행 데이터 초기화 (시스템 테스트용)</div>
     </div>
   </div>
 </div>
 
-<!-- ── 2. 메인 게임 화면 ── -->
 <div id="screen-main" class="screen">
   <div class="topbar">
     <div class="topbar-left">
@@ -128,7 +121,7 @@
       <div class="trade-card">
         <div class="section-title red">🔄 주문 (매수/매도)</div>
         <div id="trade-target" style="margin-bottom:10px; font-size:13px; font-weight:700;">선택된 종목 없음</div>
-        <input type="number" id="trade-qty" class="trade-select" placeholder="수량 입력 (예: 10)" min="1" value="1">
+        <input type="number" id="trade-qty" class="trade-select" placeholder="수량 입력" min="1" value="1">
         <div class="trade-btns">
           <button class="btn-buy" id="btn-buy" onclick="buyStock()">매수 ▲</button>
           <button class="btn-sell" id="btn-sell" onclick="sellStock()">매도 ▼</button>
@@ -138,7 +131,6 @@
   </div>
 </div>
 
-<!-- ── 3. 모달 (TURN LOCK / RESET LOCK / END GAME) ── -->
 <div id="turn-lock-overlay" class="overlay">
   <div class="lock-panel">
     <div class="lock-icon">🔒</div>
@@ -166,7 +158,6 @@
   </div>
 </div>
 
-<!-- END GAME MODAL -->
 <div id="end-overlay" class="overlay">
   <div class="panel" id="end-panel">
     <div class="panel-header">
@@ -180,11 +171,10 @@
       <div class="end-title">최종 평가</div>
       <div class="end-rank" id="end-rank">평가 중...</div>
       
-      <!-- 💡 성적표와 차트를 오갈 수 있도록 버튼을 2개로 분할했습니다. -->
       <button class="btn-start" style="margin-top:20px; background:var(--blue-mid); color:#fff;" onclick="closeModal('end-overlay')">📉 차트 다시 보기</button>
       <button class="btn-start" style="margin-top:10px;" onclick="tryEndReset()">🔄 타이틀로 돌아가기 (초기화)</button>
       
-      <div class="end-message">수고하셨습니다. 모든 거래가 종료되었습니다. <br>결과를 스크린샷으로 남기신 후 돌아가기를 눌러주세요.</div>
+      <div class="end-message">모든 거래가 종료되어 자산이 현금화되었습니다. <br>결과를 스크린샷으로 남기신 후 돌아가기를 눌러주세요.</div>
     </div>
   </div>
 </div>
@@ -198,7 +188,6 @@
   </div>
 </div>
 
-<!-- 외부 JS 파일 연결 -->
 <script src="script.js"></script>
 </body>
 </html>
