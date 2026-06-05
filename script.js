@@ -334,7 +334,7 @@ const scenarios = [
     { effects: [{stock:'$10(달러)', type:'하락'}, {stock:'스테이블 코인', type:'하락'}] },
     { effects: [{stock:'쓰봉', type:'상승'}] },
     { effects: [{stock:'두범코인', type:'대폭 하락'}] },
-    { effects: [{stock:'X코인', type'상장폐지'}]}
+    { effects: [{stock:'X코인', type:'상장폐지'}]}
   ]
 ];
 
