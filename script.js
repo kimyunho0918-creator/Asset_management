@@ -5,12 +5,12 @@
 const ADMIN_PASSWORDS = ["1234", "7777", "admin"]; 
 
 const TURN_PASSWORDS = {
-  2: "property",
-  3: "operation",
-  4: "simulation",
-  5: "with",
-  6: "toolbox",
-  7: "finish" // 6턴 종료 후 최종 주가(그래프) 반영을 위한 패스워드
+  2: "1223",
+  3: "0318",
+  4: "0821",
+  5: "0517",
+  6: "0613",
+  7: "1222" // 6턴 종료 후 최종 주가(그래프) 반영을 위한 패스워드
 };
 
 const MAX_PWD_ATTEMPTS = 3;
