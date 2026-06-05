@@ -264,7 +264,7 @@ const scenarios = [
   [
     { effects: [{stock:'스페이스 X', type:'상승'},{stock:'$10(달러)', type:'상승'},{stock:'스테이블 코인', type:'상승'}] },
     { effects: [{stock:'희토류', type:'하락'}] },
-    { effects: [{stock:'금 1돈', type:'약간 상승'}] },
+    { effects: [{stock:'금 1돈', type:'약간 상승'}] }, // 💡 금 약간 상승이 1턴에 추가되었습니다!
     { effects: [{stock:'해선땅', type:'동결'}] },
     { effects: [{stock:'SK 하이닉스', type:'상승'}] },
     { effects: [{stock:'쓰봉', type:'상승'}] },
@@ -741,7 +741,6 @@ function updatePortfolioUI() {
     const yColor = yieldRate > 0 ? 'var(--red)' : (yieldRate < 0 ? 'var(--blue)' : 'var(--text)');
     const yieldText = isDelisted ? '상장폐지(-100%)' : `${yieldRate}%`;
     
-    // ✅ 동적 단위 불러오기 적용
     const unit = getUnit(stockObj.name, stockObj.cat);
     
     portList.innerHTML += `<div class="port-item"><span style="${isDelisted?'text-decoration:line-through;color:#777;':''}">${name} <strong style="color:var(--text); margin-left:4px;">${info.qty}</strong>${unit}</span><span style="color:${yColor}; font-weight:700;">${yieldText}</span></div>`;
