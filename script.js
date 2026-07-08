@@ -25,6 +25,7 @@ let currentSelectedStock = null;
 let currentCategory = 'all';
 let chartPoints = []; 
 
+let turnPwdAttempts = 0; 
 let endPwdAttempts = 0; 
 let isViolated = false; 
 
@@ -51,7 +52,6 @@ function getInitialMarketData() {
 
 let marketData = getInitialMarketData();
 
-// ── 단위 맵핑 도우미 함수 ──
 function getUnit(name, cat) {
   if (cat === '주식') return '주';
   if (cat === '코인') return '개';
@@ -94,6 +94,7 @@ window.onload = function() {
       player = state.player || { cash: 10000000, inventory: {} };
       marketData = state.marketData || getInitialMarketData();
       endPwdAttempts = state.endPwdAttempts || 0;
+      turnPwdAttempts = state.turnPwdAttempts || 0; 
       isViolated = state.violation || false;
 
       if (isViolated) {
@@ -156,6 +157,7 @@ function saveGame() {
     player: player,
     marketData: marketData,
     endPwdAttempts: endPwdAttempts,
+    turnPwdAttempts: turnPwdAttempts,
     violation: isViolated
   };
   localStorage.setItem('stockGameState', JSON.stringify(state));
@@ -296,6 +298,27 @@ function triggerViolationScreen() {
   document.getElementById('violation-screen').classList.add('active');
 }
 
+// 💡 추가됨: 잠금 화면에서 관리자가 해제해주는 기능
+function unlockViolation() {
+  const pwdEl = document.getElementById('violation-unlock-pwd');
+  const pwd = pwdEl ? pwdEl.value.trim() : "";
+  
+  if (ADMIN_PASSWORDS.includes(pwd)) {
+    isViolated = false;
+    turnPwdAttempts = 0; // 턴 비밀번호 실패 기록 리셋
+    endPwdAttempts = 0;  // 초기화 비밀번호 실패 기록 리셋
+    saveGame();
+    alert("관리자 권한으로 시스템 잠금이 해제되었습니다.");
+    location.reload(); // 화면 원상 복구를 위해 새로고침
+  } else {
+    alert("관리자 코드가 일치하지 않습니다.");
+    if (pwdEl) {
+      pwdEl.value = '';
+      pwdEl.focus();
+    }
+  }
+}
+
 function getFluctuation(type) {
   switch(type) {
     case '대폭 상승': case '매우 상승': case '폭등': return 0.50; 
@@ -310,7 +333,6 @@ function getFluctuation(type) {
   }
 }
 
-// ── 💡 시나리오 설정 (사용자 설정 완벽 보존 / 오타 수정) ──
 const scenarios = [
   // TURN 1
   [
@@ -397,25 +419,30 @@ const scenarios = [
     { effects: [{stock:'$10(달러)', type:'하락'}, {stock:'스테이블 코인', type:'하락'}] },
     { effects: [{stock:'쓰봉', type:'상승'}] },
     { effects: [{stock:'두범코인', type:'대폭 하락'}] },
-    { effects: [{stock:'X코인', type:'상장폐지'}]} // 💡 오타 수정 반영됨
+    { effects: [{stock:'X코인', type:'상장폐지'}]} 
   ]
 ];
 
 function requestNextTurn() {
   const titleEl = document.getElementById('lock-title');
   const descEl = document.getElementById('lock-desc');
+  const errorEl = document.getElementById('lock-error');
   const inputEl = document.getElementById('lock-pwd');
   
   if(inputEl) inputEl.value = '';
-  document.getElementById('lock-error').textContent = '';
+  if(errorEl) errorEl.textContent = '';
+  
+  const dispId = document.getElementById('disp-id');
+  const isAdmin = (dispId && dispId.textContent === "ADMIN");
+  const remaining = isAdmin ? "무제한 (관리자)" : (MAX_PWD_ATTEMPTS - turnPwdAttempts) + "번";
   
   if (currentTurn < MAX_TURN) {
     const targetT = currentTurn + 1;
     titleEl.textContent = `TURN ${targetT} SYSTEM LOCK`;
-    descEl.innerHTML = `현재 시장이 마감되었습니다.<br>다음 회차(TURN ${targetT}) 거래를 재개하려면<br>운영진의 보안 암호를 해독하십시오.`;
+    descEl.innerHTML = `현재 시장이 마감되었습니다.<br>다음 회차(TURN ${targetT}) 거래를 재개하려면<br>운영진의 보안 암호를 해독하십시오.<br><span style="color:var(--red);">남은 기회: ${remaining}</span>`;
   } else {
     titleEl.textContent = `FINAL CALCULATION`;
-    descEl.innerHTML = `모든 시장 거래가 마감되었습니다.<br>최종 주가를 반영하려면<br>운영진의 보안 암호를 해독하십시오.`;
+    descEl.innerHTML = `모든 시장 거래가 마감되었습니다.<br>최종 주가를 반영하려면<br>운영진의 보안 암호를 해독하십시오.<br><span style="color:var(--red);">남은 기회: ${remaining}</span>`;
   }
   
   openModal('turn-lock-overlay');
@@ -426,23 +453,48 @@ function submitPassword() {
   const targetT = currentTurn <= MAX_TURN ? currentTurn + 1 : 7;
   const inputEl = document.getElementById('lock-pwd');
   const errorEl = document.getElementById('lock-error');
+  const descEl = document.getElementById('lock-desc');
   const pwd = inputEl ? inputEl.value.trim() : "";
   
   const correctPwd = TURN_PASSWORDS[targetT];
   const dispId = document.getElementById('disp-id');
-  const isAdminPass = (dispId && dispId.textContent === "ADMIN" && ADMIN_PASSWORDS.includes(pwd));
+  const isAdmin = (dispId && dispId.textContent === "ADMIN");
+  const isAdminPass = (isAdmin && ADMIN_PASSWORDS.includes(pwd));
 
   if (pwd === correctPwd || isAdminPass) {
+    turnPwdAttempts = 0; // 성공 시 실패 횟수 리셋
     closeModal('turn-lock-overlay');
     
     if (currentTurn <= MAX_TURN) {
       executeMarketFluctuation(currentTurn);
     }
   } else {
-    if(errorEl) errorEl.textContent = "❌ 보안 코드가 일치하지 않습니다.";
-    if(inputEl) {
-      inputEl.value = '';
-      inputEl.focus();
+    if (!isAdmin) {
+      turnPwdAttempts++; 
+      saveGame(); 
+    }
+
+    if (turnPwdAttempts >= MAX_PWD_ATTEMPTS) {
+      closeModal('turn-lock-overlay');
+      isViolated = true;
+      saveGame();
+      triggerViolationScreen();
+    } else {
+      const remaining = isAdmin ? "무제한 (관리자)" : (MAX_PWD_ATTEMPTS - turnPwdAttempts) + "번";
+      if(errorEl) errorEl.textContent = "❌ 보안 코드가 일치하지 않습니다.";
+      
+      if (descEl) {
+        if (currentTurn < MAX_TURN) {
+          descEl.innerHTML = `현재 시장이 마감되었습니다.<br>다음 회차(TURN ${targetT}) 거래를 재개하려면<br>운영진의 보안 암호를 해독하십시오.<br><span style="color:var(--red);">남은 기회: ${remaining}</span>`;
+        } else {
+          descEl.innerHTML = `모든 시장 거래가 마감되었습니다.<br>최종 주가를 반영하려면<br>운영진의 보안 암호를 해독하십시오.<br><span style="color:var(--red);">남은 기회: ${remaining}</span>`;
+        }
+      }
+
+      if(inputEl) {
+        inputEl.value = '';
+        inputEl.focus();
+      }
     }
   }
 }
@@ -475,8 +527,8 @@ function executeMarketFluctuation(completedTurn) {
       if (netRate === undefined) {
         netRate = 0; 
       } else {
-        if (netRate > 0.30) netRate = 0.30;
-        if (netRate < -0.30) netRate = -0.30;
+        if (netRate > 0.50) netRate = 0.50; // 수정하신 0.5 적용
+        if (netRate < -0.50) netRate = -0.50;
       }
       stock.price = Math.floor(stock.price * (1 + netRate));
       if(stock.price <= 0) stock.price = 10;
@@ -543,7 +595,6 @@ function endGame() {
   document.getElementById('end-overlay').classList.add('open');
 }
 
-// ── 💡 100% 실행 보장 시작 로직 (방어 코드) ──
 function startGame() {
   const elId = document.getElementById('inp-id');
   const elName = document.getElementById('inp-name');
@@ -555,7 +606,6 @@ function startGame() {
   
   let teamSize = "";
   
-  // 구버전 HTML과 신버전 HTML을 자동으로 감지하여 에러 방지
   const typeRadio = document.querySelector('input[name="team-input-type"]:checked');
   const selEl = document.getElementById('inp-team-size-sel');
   const dirEl = document.getElementById('inp-team-size-dir');
@@ -567,7 +617,7 @@ function startGame() {
   } else if (oldEl) {
     teamSize = oldEl.value.trim();
   } else {
-    teamSize = "1"; // 최악의 경우 기본값 세팅
+    teamSize = "1"; 
   }
 
   if(!id || !name || !teamSize) {
