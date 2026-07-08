@@ -298,13 +298,13 @@ function triggerViolationScreen() {
 
 function getFluctuation(type) {
   switch(type) {
-    case '대폭 상승': case '매우 상승': case '폭등': return 0.30; 
-    case '상승': return 0.20;                       
+    case '대폭 상승': case '매우 상승': case '폭등': return 0.50; 
+    case '상승': return 0.30;                       
     case '약간 상승': return 0.10;                  
     case '동결': return 0.0;
     case '약간 하락': case '약간 감소': return -0.10;                 
-    case '하락': case '감소': return -0.20;                      
-    case '대폭 하락': case '폭락': return -0.30;                 
+    case '하락': case '감소': return -0.30;                      
+    case '대폭 하락': case '폭락': return -0.50;                 
     case '상장폐지': return -1;
     default: return 0;
   }
