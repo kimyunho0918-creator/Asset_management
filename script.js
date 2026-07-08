@@ -211,24 +211,6 @@ function adminLogin() {
   }
 }
 
-function checkAdminMode() {
-  const elId = document.getElementById('inp-id');
-  const elName = document.getElementById('inp-name');
-  if(!elId || !elName) return;
-
-  const idVal = elId.value.trim();
-  const nameVal = elName.value.trim().toLowerCase();
-  
-  const resetBtn = document.getElementById('admin-reset-btn');
-  if(resetBtn) {
-    if ((nameVal === "admin" || nameVal === "admain") && idVal === "") {
-      resetBtn.style.display = 'block';
-    } else {
-      resetBtn.style.display = 'none';
-    }
-  }
-}
-
 function requestSystemReset() {
   const remaining = MAX_PWD_ATTEMPTS - endPwdAttempts;
   document.getElementById('reset-error').textContent = '';
@@ -298,18 +280,17 @@ function triggerViolationScreen() {
   document.getElementById('violation-screen').classList.add('active');
 }
 
-// 💡 추가됨: 잠금 화면에서 관리자가 해제해주는 기능
 function unlockViolation() {
   const pwdEl = document.getElementById('violation-unlock-pwd');
   const pwd = pwdEl ? pwdEl.value.trim() : "";
   
   if (ADMIN_PASSWORDS.includes(pwd)) {
     isViolated = false;
-    turnPwdAttempts = 0; // 턴 비밀번호 실패 기록 리셋
-    endPwdAttempts = 0;  // 초기화 비밀번호 실패 기록 리셋
+    turnPwdAttempts = 0; 
+    endPwdAttempts = 0;  
     saveGame();
     alert("관리자 권한으로 시스템 잠금이 해제되었습니다.");
-    location.reload(); // 화면 원상 복구를 위해 새로고침
+    location.reload(); 
   } else {
     alert("관리자 코드가 일치하지 않습니다.");
     if (pwdEl) {
@@ -462,7 +443,7 @@ function submitPassword() {
   const isAdminPass = (isAdmin && ADMIN_PASSWORDS.includes(pwd));
 
   if (pwd === correctPwd || isAdminPass) {
-    turnPwdAttempts = 0; // 성공 시 실패 횟수 리셋
+    turnPwdAttempts = 0; 
     closeModal('turn-lock-overlay');
     
     if (currentTurn <= MAX_TURN) {
@@ -527,7 +508,7 @@ function executeMarketFluctuation(completedTurn) {
       if (netRate === undefined) {
         netRate = 0; 
       } else {
-        if (netRate > 0.50) netRate = 0.50; // 수정하신 0.5 적용
+        if (netRate > 0.50) netRate = 0.50; 
         if (netRate < -0.50) netRate = -0.50;
       }
       stock.price = Math.floor(stock.price * (1 + netRate));
