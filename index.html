@@ -186,6 +186,11 @@
   <div class="violation-desc">
     인가되지 않은 시스템 접근 시도가 감지되어 프로그램이 영구 잠금 처리되었습니다.<br>운영진에게 문의하십시오.
   </div>
+  
+  <div style="margin-top: 40px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+    <input type="password" id="violation-unlock-pwd" placeholder="관리자 해제 코드" style="padding: 12px; width: 250px; border-radius: 8px; border: none; text-align: center; font-size: 14px; outline: none; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #ff4d4d;" onkeypress="if(event.key==='Enter') unlockViolation()">
+    <button onclick="unlockViolation()" style="padding: 12px; width: 250px; border-radius: 8px; border: none; background: #fff; color: #b40000; font-weight: 900; cursor: pointer; font-size: 14px;">관리자 권한 잠금 해제</button>
+  </div>
 </div>
 
 <script src="script.js"></script>
