@@ -24,11 +24,11 @@
       <h2>📋 팀 정보 입력</h2>
       <div class="field-group">
         <label>학번</label>
-        <input type="text" id="inp-id" placeholder="예) 20261234" oninput="checkAdminMode()">
+        <input type="text" id="inp-id" placeholder="예) 20261234">
       </div>
       <div class="field-group">
         <label>이름</label>
-        <input type="text" id="inp-name" placeholder="예) 홍길동" oninput="checkAdminMode()">
+        <input type="text" id="inp-name" placeholder="예) 홍길동">
       </div>
 
       <div class="field-group">
@@ -60,7 +60,7 @@
 
       <button class="btn-start" onclick="startGame()">▶ 게임 시작 (총 6턴)</button>
       
-      <div id="admin-reset-btn" class="reset-note" style="display: none;" onclick="requestSystemReset()">진행 데이터 초기화 (시스템 테스트용)</div>
+      <div id="admin-reset-btn" class="reset-note" onclick="requestSystemReset()">🔄 시스템 데이터 초기화 (관리자 암호 필요)</div>
     </div>
   </div>
 </div>
