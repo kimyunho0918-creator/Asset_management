@@ -2,7 +2,7 @@
 // ⚙️ [관리자 설정] 비밀번호 및 횟수 설정 구역
 // ==========================================
 
-const ADMIN_PASSWORDS = ["hoyuho0918","yes&echo"]; 
+const ADMIN_PASSWORDS = ["1234", "7777", "admin"]; 
 
 const TURN_PASSWORDS = {
   2: "1223",
@@ -33,7 +33,7 @@ function getInitialMarketData() {
   return [
     { name: 'RE:CORE', cat: '주식', price: 50000, history: [50000], active: true, prev: 50000 },
     { name: '겨그린', cat: '주식', price: 15000, history: [15000], active: true, prev: 15000 },
-    { name: '물류', cat: '주식', price: 35000, history: [35000], active: true, prev: 35000 },
+    { name: 'DTX', cat: '주식', price: 35000, history: [35000], active: true, prev: 35000 },
     { name: '루프빈', cat: '주식', price: 85000, history: [85000], active: true, prev: 85000 },
     { name: '스페이스 X', cat: '주식', price: 150000, history: [150000], active: true, prev: 150000 },
     { name: 'SK 하이닉스', cat: '주식', price: 195000, history: [195000], active: true, prev: 195000 },
@@ -132,7 +132,7 @@ window.onload = function() {
 
       renderMarket(currentCategory);
       updatePortfolioUI();
-      selectStock('물류'); 
+      selectStock('DTX'); 
     } catch (e) {
       console.error("데이터 복구 오류. 초기화합니다.", e);
       localStorage.removeItem('stockGameState');
@@ -323,7 +323,7 @@ const scenarios = [
     { effects: [{stock:'해선땅', type:'동결'}] },
     { effects: [{stock:'SK 하이닉스', type:'상승'}] },
     { effects: [{stock:'겨그린', type:'상승'}] },
-    { effects: [{stock:'물류', type:'상승'}] },
+    { effects: [{stock:'DTX', type:'상승'}] },
     { effects: [{stock:'루프빈', type:'상승'}] },
     { effects: [{stock:'Y코인', type:'동결'}] },
     { effects: [{stock:'¥100(위안)', type:'하락'}] },
@@ -337,7 +337,7 @@ const scenarios = [
     { effects: [{stock:'두범코인', type:'상승'}] },
     { effects: [{stock:'금 1돈', type:'약간 하락'}] },
     { effects: [{stock:'스페이스 X', type:'하락'}] },
-    { effects: [{stock:'물류', type:'하락'}] },
+    { effects: [{stock:'DTX', type:'하락'}] },
     { effects: [{stock:'Y코인', type:'동결'}] },
     { effects: [{stock:'현대차', type:'약간 상승'}] },
     { effects: [{stock:'해선땅', type:'상승'}] },
@@ -353,7 +353,7 @@ const scenarios = [
     { effects: [{stock:'루프빈', type:'대폭 하락'}] },
     { effects: [{stock:'금 1돈', type:'약간 상승'}] },
     { effects: [{stock:'현대차', type:'약간 하락'}] },
-    { effects: [{stock:'물류', type:'상승'}] },
+    { effects: [{stock:'DTX', type:'상승'}] },
     { effects: [{stock:'Y코인', type:'동결'}] },
     { effects: [{stock:'RE:CORE', type:'대폭 하락'}] },
     { effects: [{stock:'옥땅', type:'상승'}] },
@@ -378,7 +378,7 @@ const scenarios = [
   [
     { effects: [{stock:'RE:CORE', type:'하락'}] },
     { effects: [{stock:'루프빈', type:'대폭 하락'}] },
-    { effects: [{stock:'물류', type:'약간 상승'}] },
+    { effects: [{stock:'DTX', type:'약간 상승'}] },
     { effects: [{stock:'금 1돈', type:'동결'}] },
     { effects: [{stock:'겨그린', type:'대폭 하락'}] },
     { effects: [{stock:'Y코인', type:'동결'}] },
@@ -390,7 +390,7 @@ const scenarios = [
   ],
   // TURN 6
   [
-    { effects: [{stock:'물류', type:'상승'}] },
+    { effects: [{stock:'DTX', type:'상승'}] },
     { effects: [{stock:'현대차', type:'대폭 하락'}] },
     { effects: [{stock:'해선땅', type:'상승'}, {stock:'SK 하이닉스', type:'상승'}] },
     { effects: [{stock:'희토류', type:'매우 상승'}] },
