@@ -17,7 +17,204 @@
         <div onclick="adminLogin()" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; z-index: 100;"></div>
         <div class="logo-icon">📈</div>
         <h1>모의 주식 게임</h1>
+      </div><!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>모의 주식 게임 - 시나리오 통제 시스템</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    
+    <div style="text-align: center; margin-bottom: 36px;">
+      <div class="login-logo" style="position: relative; display: inline-block;">
+        <div onclick="adminLogin()" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; z-index: 100;"></div>
+        <div class="logo-icon">📈</div>
+        <h1>모의 주식 게임</h1>
       </div>
+    </div>
+
+    <div class="login-card">
+      <h2>📋 팀 정보 입력</h2>
+      <div class="field-group">
+        <label>학번</label>
+        <input type="text" id="inp-id" placeholder="예) 20261234">
+      </div>
+      <div class="field-group">
+        <label>이름</label>
+        <input type="text" id="inp-name" placeholder="예) 홍길동">
+      </div>
+
+      <div class="field-group">
+        <label>팀원 수</label>
+        <div style="display: flex; gap: 16px; margin-bottom: 10px;">
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="radio" name="team-input-type" value="select" checked onchange="toggleTeamInput()"> 선택형
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="radio" name="team-input-type" value="direct" onchange="toggleTeamInput()"> 직접 입력
+          </label>
+        </div>
+        
+        <select id="inp-team-size-sel" class="trade-select" style="margin-bottom: 0;">
+          <option value="1">1명</option>
+          <option value="2">2명</option>
+          <option value="3">3명</option>
+          <option value="4">4명</option>
+          <option value="5">5명</option>
+          <option value="6">6명</option>
+          <option value="7">7명</option>
+          <option value="8">8명</option>
+          <option value="9">9명</option>
+          <option value="10">10명</option>
+        </select>
+        
+        <input type="number" id="inp-team-size-dir" placeholder="예) 4" min="1" style="display:none; margin-bottom: 0;">
+      </div>
+
+      <button class="btn-start" onclick="startGame()">▶ 게임 시작 (총 6턴)</button>
+      
+      <div id="admin-reset-btn" class="reset-note" onclick="requestSystemReset()">🔄 시스템 데이터 초기화 (관리자 암호 필요)</div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-main" class="screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">📈 모의 주식 게임</div>
+      <div class="topbar-user">
+        학번: <span id="disp-id">-</span> | <span id="disp-name">-</span>
+        <span id="disp-team-size" class="team-size"></span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="turn-badge" id="disp-turn">TURN 1 / 6</div>
+      <button class="btn-turn" onclick="requestNextTurn()">⏳ 턴 넘기기</button>
+      <button class="btn-top-reset" id="btn-admin-reset-main" style="display: none;" onclick="requestSystemReset()">🔄 초기화</button>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div>
+      <div class="section-title">📋 종목 카테고리</div>
+      <div class="cat-tabs">
+        <button class="cat-btn active" onclick="filterCat('all', this)">전체</button>
+        <button class="cat-btn" onclick="filterCat('주식', this)">주식/기업</button>
+        <button class="cat-btn" onclick="filterCat('부동산', this)">부동산</button>
+        <button class="cat-btn" onclick="filterCat('코인', this)">코인</button>
+        <button class="cat-btn" onclick="filterCat('외화', this)">외화</button>
+      </div>
+      <div class="stock-list-box" id="stock-list-container"></div>
+    </div>
+
+    <div>
+      <div class="graph-card">
+        <div class="graph-header">
+          <div>
+            <div class="graph-title" id="selected-stock-name">종목을 선택하세요</div>
+            <div class="graph-price-info" id="selected-stock-details">좌측 리스트에서 종목을 클릭하면 차트가 표시됩니다.</div>
+          </div>
+        </div>
+        <div class="graph-container" id="graph-container">
+          <div id="chart-crosshair-x"></div>
+          <div id="chart-tooltip"></div>
+          <canvas id="stockChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="info-card">
+        <div class="section-title">💼 내 포트폴리오</div>
+        <div class="holding-row"><div class="hl">💰 보유 현금</div><div class="hv blue" id="my-cash">10,000,000원</div></div>
+        <div class="holding-row"><div class="hl">📈 총 자산</div><div class="hv" id="my-total">10,000,000원</div></div>
+        <div class="portfolio-list" id="portfolio-list"></div>
+      </div>
+
+      <div class="trade-card">
+        <div class="section-title red">🔄 주문 (매수/매도)</div>
+        <div id="trade-target" style="margin-bottom:10px; font-size:13px; font-weight:700;">선택된 종목 없음</div>
+        <input type="number" id="trade-qty" class="trade-select" placeholder="수량 입력" min="1" value="1">
+        <div class="trade-btns">
+          <button class="btn-buy" id="btn-buy" onclick="buyStock()">매수 ▲</button>
+          <button class="btn-sell" id="btn-sell" onclick="sellStock()">매도 ▼</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="turn-lock-overlay" class="overlay">
+  <div class="lock-panel">
+    <div class="lock-icon">🔒</div>
+    <h2 id="lock-title" class="lock-title">MARKET CLOSED</h2>
+    <p id="lock-desc" class="lock-desc">다음 턴으로 이동하기 위한 보안 키를 입력하세요.</p>
+    <div class="lock-input-wrap">
+      <input type="password" id="lock-pwd" class="lock-input" placeholder="비밀번호 입력" onkeypress="if(event.key==='Enter') submitPassword()">
+    </div>
+    <div id="lock-error" class="lock-error"></div>
+    <button class="btn-unlock" onclick="submitPassword()">보안 해제 및 시스템 접속</button>
+  </div>
+</div>
+
+<div id="reset-lock-overlay" class="overlay">
+  <div class="lock-panel">
+    <div class="lock-icon">🔐</div>
+    <h2 class="lock-title">SYSTEM RESET</h2>
+    <p class="lock-desc" id="reset-desc-text">초기 화면으로 돌아가려면 관리자 비밀번호를 입력하세요.</p>
+    <div class="lock-input-wrap">
+      <input type="password" id="reset-pwd" class="lock-input" placeholder="비밀번호 입력" onkeypress="if(event.key==='Enter') submitResetPassword()">
+    </div>
+    <div id="reset-error" class="lock-error"></div>
+    <button class="btn-unlock" onclick="submitResetPassword()">보안 해제 및 초기화</button>
+    <button class="btn-cancel" onclick="closeModal('reset-lock-overlay')">취소</button>
+  </div>
+</div>
+
+<div id="end-overlay" class="overlay">
+  <div class="panel" id="end-panel">
+    <div class="panel-header">
+      <h2>🎉 게임 종료!</h2>
+    </div>
+    <div class="end-stats">
+      <div class="end-title">최종 자산</div>
+      <div class="end-value" id="end-total" style="color:var(--text);">0원</div>
+      <div class="end-title">총 수익률</div>
+      <div class="end-value" id="end-yield">0%</div>
+      <div class="end-title">최종 평가</div>
+      <div class="end-rank" id="end-rank">평가 중...</div>
+      
+      <button class="btn-start" style="margin-top:20px; background:var(--blue-mid); color:#fff;" onclick="closeModal('end-overlay')">📉 차트 다시 보기</button>
+      <button class="btn-start" style="margin-top:10px;" onclick="tryEndReset()">🔄 타이틀로 돌아가기 (초기화)</button>
+      
+      <div class="end-message">모든 거래가 종료되어 자산이 현금화되었습니다. <br>결과를 스크린샷으로 남기신 후 돌아가기를 눌러주세요.</div>
+    </div>
+  </div>
+</div>
+
+<div id="violation-screen">
+  <div class="violation-icon">⚠️</div>
+  <div class="violation-title">규칙 위반 감지</div>
+  <div class="violation-id-box" id="violation-id-display">학번: -</div>
+  <div class="violation-desc">
+    인가되지 않은 시스템 접근 시도가 감지되어 프로그램이 영구 잠금 처리되었습니다.<br>운영진에게 문의하십시오.
+  </div>
+  
+  <div style="margin-top: 40px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+    <input type="password" id="violation-unlock-pwd" placeholder="관리자 해제 코드" style="padding: 12px; width: 250px; border-radius: 8px; border: none; text-align: center; font-size: 14px; outline: none; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #ff4d4d;" onkeypress="if(event.key==='Enter') unlockViolation()">
+    <button onclick="unlockViolation()" style="padding: 12px; width: 250px; border-radius: 8px; border: none; background: #fff; color: #b40000; font-weight: 900; cursor: pointer; font-size: 14px;">관리자 권한 잠금 해제</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
     </div>
 
     <div class="login-card">
