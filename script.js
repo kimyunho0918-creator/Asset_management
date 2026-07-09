@@ -2,7 +2,7 @@
 // ⚙️ [관리자 설정] 비밀번호 및 횟수 설정 구역
 // ==========================================
 
-const ADMIN_PASSWORDS = ["hoyuho0918"]; 
+const ADMIN_PASSWORDS = ["hoyuho0918","yes&echo"]; 
 
 const TURN_PASSWORDS = {
   2: "1223",
