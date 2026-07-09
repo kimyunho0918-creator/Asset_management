@@ -2,7 +2,7 @@
 // ⚙️ [관리자 설정] 비밀번호 및 횟수 설정 구역
 // ==========================================
 
-const ADMIN_PASSWORDS = ["hoyunho0918"]; 
+const ADMIN_PASSWORDS = ["1234", "7777", "admin"]; 
 
 const TURN_PASSWORDS = {
   2: "1223",
@@ -32,7 +32,7 @@ let isViolated = false;
 function getInitialMarketData() {
   return [
     { name: '희토류', cat: '주식', price: 50000, history: [50000], active: true, prev: 50000 },
-    { name: '쓰봉', cat: '주식', price: 15000, history: [15000], active: true, prev: 15000 },
+    { name: '겨그린', cat: '주식', price: 15000, history: [15000], active: true, prev: 15000 },
     { name: '물류', cat: '주식', price: 35000, history: [35000], active: true, prev: 35000 },
     { name: '루프빈', cat: '주식', price: 85000, history: [85000], active: true, prev: 85000 },
     { name: '스페이스 X', cat: '주식', price: 150000, history: [150000], active: true, prev: 150000 },
@@ -322,7 +322,7 @@ const scenarios = [
     { effects: [{stock:'금 1돈', type:'약간 상승'}] }, 
     { effects: [{stock:'해선땅', type:'동결'}] },
     { effects: [{stock:'SK 하이닉스', type:'상승'}] },
-    { effects: [{stock:'쓰봉', type:'상승'}] },
+    { effects: [{stock:'겨그린', type:'상승'}] },
     { effects: [{stock:'물류', type:'상승'}] },
     { effects: [{stock:'루프빈', type:'상승'}] },
     { effects: [{stock:'Y코인', type:'동결'}] },
@@ -332,7 +332,7 @@ const scenarios = [
   ],
   // TURN 2
   [
-    { effects: [{stock:'쓰봉', type:'하락'}] },
+    { effects: [{stock:'겨그린', type:'하락'}] },
     { effects: [{stock:'루프빈', type:'상승'}] },
     { effects: [{stock:'두범코인', type:'상승'}] },
     { effects: [{stock:'금 1돈', type:'약간 하락'}] },
@@ -362,7 +362,7 @@ const scenarios = [
   // TURN 4
   [
     { effects: [{stock:'희토류', type:'상승'}] },
-    { effects: [{stock:'쓰봉', type:'상승'}] },
+    { effects: [{stock:'겨그린', type:'상승'}] },
     { effects: [{stock:'스페이스 X', type:'상장폐지'}] },
     { effects: [{stock:'스페이스 X', type:'하락'}] },
     { effects: [{stock:'현대차', type:'상승'}] },
@@ -380,7 +380,7 @@ const scenarios = [
     { effects: [{stock:'루프빈', type:'대폭 하락'}] },
     { effects: [{stock:'물류', type:'약간 상승'}] },
     { effects: [{stock:'금 1돈', type:'동결'}] },
-    { effects: [{stock:'쓰봉', type:'대폭 하락'}] },
+    { effects: [{stock:'겨그린', type:'대폭 하락'}] },
     { effects: [{stock:'Y코인', type:'동결'}] },
     { effects: [{stock:'¥100(위안)', type:'하락'}] },
     { effects: [{stock:'현대차', type:'상승'}] },
@@ -398,7 +398,7 @@ const scenarios = [
     { effects: [{stock:'Y코인', type:'약간 상승'}] },
     { effects: [{stock:'루프빈', type:'상장폐지'}] },
     { effects: [{stock:'$10(달러)', type:'하락'}, {stock:'스테이블 코인', type:'하락'}] },
-    { effects: [{stock:'쓰봉', type:'상승'}] },
+    { effects: [{stock:'겨그린', type:'상승'}] },
     { effects: [{stock:'두범코인', type:'대폭 하락'}] },
     { effects: [{stock:'X코인', type:'상장폐지'}]} 
   ]
